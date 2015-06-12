@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-MAP_SIZE = (27, 20) #size in tiles
+MAP_SIZE = (100, 60) #size in tiles
 CAMERA_SIZE = (640, 480) #size in pixels
 
 class ImageManager:
@@ -31,10 +31,11 @@ class Map:
 				self.map[x].append(Tile((x, y)))
 
 class Camera:
-	def __init__(self, scroll_speed = 5):
+	def __init__(self):
 		self.x = 0
 		self.y = 0
-		self.scroll_speed = 1
+		self.velX = 0
+		self.velY = 0
 
 	def changeX(self, x):
 		self.x += x
@@ -85,18 +86,19 @@ def processEvents(keys, camera):
 				keys.append(event.key)
 			if event.type == KEYUP:
 				keys.remove(event.key)
+			if event.type == MOUSEBUTTONUP:
+				if event.button == 2:
+					camera.setVel(0, 0)
 
 	for key in keys:
 		if key == K_ESCAPE:
 			running = False
-		elif (key == K_w) or (key == K_UP):
-			camera.changeY(camera.scroll_speed*(-1))
-		elif (key == K_s) or (key == K_DOWN):
-			camera.changeY(camera.scroll_speed)
-		elif (key == K_a) or (key == K_LEFT):
-			camera.changeX(camera.scroll_speed*(-1))
-		elif (key == K_d) or (key == K_RIGHT):
-			camera.changeX(camera.scroll_speed)
+	
+	rel = pygame.mouse.get_rel()
+	if pygame.mouse.get_pressed()[2]:
+		camera.changeX(rel[0])
+		camera.changeY(rel[1])
+
 
 	return running
 
