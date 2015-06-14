@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-MAP_SIZE = (27, 20) #size in tiles
+MAP_SIZE = (80, 100) #size in tiles
 CAMERA_SIZE = (640, 480) #size in pixels
 
 class ImageManager:
@@ -31,10 +31,41 @@ class Map:
 				self.map[x].append(Tile((x, y)))
 
 class Camera:
-	def __init__(self, scroll_speed = 5):
+	def __init__(self):
+		self.velX = 0.0
+		self.velY = 0.0
+		self.maxVel = 20
 		self.x = 0
 		self.y = 0
 		self.scroll_speed = 1
+		self.friction = 0.5
+
+	def addVelX(self, right = True):
+		if right and not (self.velX >= self.maxVel):
+			self.velX += 1
+		else:
+			if not (self.velX <= ((-1)*self.maxVel)):
+				self.velX -= 1
+	
+	def addVelY(self, down = True):
+		if down and not (self.velY >= self.maxVel):
+			self.velY += 1
+		else:
+			if not (self.velY <= ((-1)*self.maxVel)):
+				self.velY -= 1
+	
+	def tick(self, pressed):
+		self.changeX(int(self.velX))
+		self.changeY(int(self.velY))
+		if not pressed:
+			if self.velX > 0:
+				self.velX -= self.friction
+			elif self.velX < 0:
+				self.velX += self.friction
+			if self.velY > 0:
+				self.velY -= self.friction
+			elif self.velY < 0:
+				self.velY += self.friction
 
 	def changeX(self, x):
 		self.x += x
@@ -77,6 +108,10 @@ def main():
 	pygame.quit()
 
 def processEvents(keys, camera):
+	mouseRel = pygame.mouse.get_rel()
+	pressed = False
+	if pygame.mouse.get_pressed()[2]:
+		pressed = True
 	running = True
 	for event in pygame.event.get():
 			if event.type == QUIT:
@@ -89,14 +124,19 @@ def processEvents(keys, camera):
 	for key in keys:
 		if key == K_ESCAPE:
 			running = False
-		elif (key == K_w) or (key == K_UP):
-			camera.changeY(camera.scroll_speed*(-1))
-		elif (key == K_s) or (key == K_DOWN):
-			camera.changeY(camera.scroll_speed)
-		elif (key == K_a) or (key == K_LEFT):
-			camera.changeX(camera.scroll_speed*(-1))
-		elif (key == K_d) or (key == K_RIGHT):
-			camera.changeX(camera.scroll_speed)
+
+	if pressed:
+		if mouseRel[0] > 0:
+			camera.addVelX()
+		elif mouseRel[0] < 0:
+			camera.addVelX(False)
+		if mouseRel[1] > 0:
+			camera.addVelY()
+		elif mouseRel[1] < 0:
+			camera.addVelY(False)
+
+	camera.tick(pressed)
+
 
 	return running
 
@@ -113,6 +153,8 @@ def render(manager, screen, map, camera):
 		for y in range(range_y):
 			tile = map.map[((camera.x/32)+x)][((camera.y/32)+y)]
 			screen.blit(manager.use(tile.sprite), ((tile.x-camera.x), (tile.y-camera.y)))
+	caption = "[" + str(camera.x)+","+str(camera.y)+"], ("+str(camera.velX)+","+str(camera.velY)+")"
+	pygame.display.set_caption(caption)
 	pygame.display.update()
 
 main()
