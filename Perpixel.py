@@ -99,6 +99,8 @@ def main():
 	keys = []
 	running = True
 	while running:
+		clock.tick(60)
+
 		#process events
 		running = processEvents(keys, camera)
 
