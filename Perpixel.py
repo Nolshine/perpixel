@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-MAP_SIZE = (80, 100) #size in tiles
+MAP_SIZE = (100, 60) #size in tiles
 CAMERA_SIZE = (640, 480) #size in pixels
 
 class ImageManager:
@@ -120,10 +120,13 @@ def processEvents(keys, camera):
 				keys.append(event.key)
 			if event.type == KEYUP:
 				keys.remove(event.key)
+			if event.type == MOUSEBUTTONUP:
+				if event.button == 2:
+					camera.setVel(0, 0)
 
 	for key in keys:
 		if key == K_ESCAPE:
-			running = False
+			running = Fals
 
 	if pressed:
 		if mouseRel[0] > 0:
